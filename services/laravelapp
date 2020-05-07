@@ -1,0 +1,19 @@
+server {
+	listen *:80;
+	listen [::]:80;
+	server_name laravelapp.ru;
+	access_log /var/log/nginx/access.log;
+	index  index.php;
+	charset utf-8;
+
+	location / {
+		proxy_pass  http://laravelapp.ru:8080;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $remote_addr;
+		proxy_connect_timeout 120;
+		proxy_send_timeout 120;
+		proxy_read_timeout 180;
+		try_files $uri $uri/ /index.php?$query_string;
+}
+}

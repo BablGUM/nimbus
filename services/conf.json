@@ -1,0 +1,17 @@
+{
+	"applications": {
+		"laravelapp": {
+			"type": "php",
+			"user": "vladislav",
+			"group": "vladislav",
+			"script": "index.php",
+			"root": "/var/www/laravelapp/public",
+			"index": "index.php"
+		}
+	},
+	"listeners": {
+		"*:8080": {
+			"pass": "applications/laravelapp"
+		}
+	}
+}
