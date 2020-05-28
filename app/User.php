@@ -6,6 +6,7 @@ namespace App;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -19,6 +20,9 @@ class User extends Authenticatable
     protected $fillable = [
         'login',
         'email',
+        'full_name',
+        'phone',
+        'residence_address',
         'password',
         'role_id',
         'verefi_code',
@@ -27,7 +31,11 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
-        'remember_token',
+        'api_token',
+        'reset_code',
+        'verefi_code',
+        'is_admin',
+
     ];
 
     protected $casts = [
@@ -36,7 +44,7 @@ class User extends Authenticatable
 
     public function role()
     {
-        return $this->hasMany('App\Role');
+        return $this->hasMany('App\Role','id','role_id');
     }
 
     /**
@@ -54,7 +62,9 @@ class User extends Authenticatable
      */
     public function generateToken()
     {
-        $this->api_token = Auth::user()->createToken('token')->accessToken;
+        $this->api_token = $token = Str::random(60);
+        Auth::user()->api_token = $this->api_token;
+        Auth::user()->save();
         return $this->api_token;
     }
     /**
@@ -63,11 +73,18 @@ class User extends Authenticatable
      */
     public function removeToken()
     {
-        $this->api_token = Auth::user()->token()->revoke();
+        Auth::user()->api_token = null;
+        Auth::user()->save();
         return $this->api_token;
     }
-
-    public function toSendEmailLink($request,$link)
+    /**
+     * Отправка сообщения для восстановление пароля
+     * @param $request,$link
+     *
+     * @return null
+     *
+     */
+    public function toSendEmailLink($request, $link)
     {
         $request->reset_code = \Illuminate\Support\Str::random(32);
         $request->save();

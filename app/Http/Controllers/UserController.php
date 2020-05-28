@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 
 use App\Role;
-use App\Task;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserAddRequest;
 use Illuminate\Support\Facades\Validator;
@@ -31,7 +30,9 @@ class UserController extends Controller
     {
         $roles = Role::where('role_name', '=', $request->role)->get()->first()->id;
         $request->role_id = $roles;
-
+        if($request->role == 'Посредник'){
+            $request->role_id = 'asdasd';
+        }
         $data = $request->validated();
 
         $user = User::create($this->generateArrayRequest($request));
@@ -42,6 +43,7 @@ class UserController extends Controller
 
         return $this->sendResponse($user, 'Created', 201);
     }
+
     /**
      * Подтверждение почты пользователем
      *
@@ -57,6 +59,7 @@ class UserController extends Controller
 
         return response()->json($res, 200);
     }
+
     /**
      * Проверка уникальности почты и логина
      *
@@ -75,6 +78,7 @@ class UserController extends Controller
 
         return response()->json($data, 200);
     }
+
     /**
      * Вход пользвателя через login и password или email password
      *
@@ -89,9 +93,9 @@ class UserController extends Controller
 
         if ((Auth::attempt(['login' => request('username'), 'password' => request('password')])) ||
             (Auth::attempt(['email' => request('username'), 'password' => request('password')]))) {
-
             $user = Auth::user();
             $token = $user->generateToken();
+            $user->remember_token = $token;
 
             $roles = Role::where('id', '=', $user->role_id)->get()->first()->role_name;
 
@@ -100,6 +104,7 @@ class UserController extends Controller
                     'userID' => $user->id,
                     'login' => $user->login,
                     'email' => $user->email,
+                    'full_name' => $user->full_name,
                     'token' => $token,
                     'role' => $roles
                 ],
@@ -117,14 +122,22 @@ class UserController extends Controller
      *
      * @return void
      *
-     * @Rest\GET("/user-logout")
+     * @Rest\Get("/user-logout")
      */
     public function logoutUser(Request $request)
     {
         $user = Auth::user();
         $user->removeToken();
     }
-
+    /**
+     * Отправка сообщения почту при регистрации
+     *
+     * @param Request $request
+     *
+     * @return boolean
+     *
+     * @Rest\Post("/send")
+     */
     public function toSendMessageToEmail(Request $request)
     {
         if ($user = User::where(['email' => $request->email])->first()) {
@@ -135,7 +148,15 @@ class UserController extends Controller
             return response()->json(false, 401);
         }
     }
-
+    /**
+     * Отправка сообщения почту при восстановлении пароля
+     *
+     * @param Request $request
+     *
+     * @return boolean
+     *
+     * @Rest\Post("/password")
+     */
     public function resetPassword(Request $request)
     {
         if ($user = User::where(['reset_code' => $request->reset_code])->first()) {
@@ -143,7 +164,7 @@ class UserController extends Controller
             $user->reset_code = null;
             $user->save();
             Mail::send(['html' => 'password'], ['name' => $user->login],
-                function ($message) use ($request,$user) {
+                function ($message) use ($request, $user) {
                     $message->to($user->email, $user->email)->subject('Изменение пароля');
                     $message->from('technical.platformss@gmail.com', 'Technical Platform');
 
@@ -154,15 +175,76 @@ class UserController extends Controller
             return response()->json(false, 401);
         }
     }
-
+    /**
+     *  Проверка на код восстановления
+     * ( для того чтобы при переходе на ссылку восстановления пароля писало что она неактивна)
+     *
+     * @param Request $request
+     *
+     * @return boolean
+     *
+     */
     public function checkResetCode(Request $request)
     {
 
-        if($user = User::where(['reset_code' => $request->reset_code])->first()){
+        if ($user = User::where(['reset_code' => $request->reset_code])->first()) {
             return response()->json(true, 200);
-        }else{
+        } else {
             return response()->json(false, 200);
         }
+    }
+    /**
+     *  Личный кабинет
+     *
+     *
+     *
+     * @return mixed
+     *
+     * @Rest\Get("/user")
+     */
+    public function index()
+    {
+
+        $user = User::with('role')->find(Auth::user()->id);
+        return $this->sendResponse($user,'ok',200);
+    }
+    /**
+     *  Просмотр анкеты пользователя
+     *  @param Request $id
+     *
+     *
+     * @return mixed
+     *
+     * @Rest\Get("/user/{id}")
+     */
+    public function show($id)
+    {
+        if(  $user = User::with('role')->find($id)){
+            return $this->sendResponse($user,'ok',200);
+        }  else {
+            return $this->sendError('Not Found User',404,$user=['Пользователь не найден']);
+        }
+
+    }
+    /**
+     * Редактирование данных в личном кабинете
+     *
+     * @param Request $request
+     *
+     * @return mixed
+     *
+     * @Rest\Post("/user")
+     */
+    public function edit(Request $request){
+        $user = Auth::user();
+        $data = array_merge(request()->all(),
+            [
+                'full_name' => $request->last_name . " " .$request->first_name . " " . $request->patronymic
+            ]);
+
+        $user->update($data);
+        $user->save();
+        return $this->sendResponse($user,"OK",200);
     }
 
 }

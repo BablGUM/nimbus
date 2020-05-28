@@ -19,7 +19,15 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests, ApiResponse;
 
-
+    /**
+     * Генерация массива данных для регистрации
+     *
+     * @param  $request
+     *
+     * @return array
+     *
+     *
+     */
     public function generateArrayRequest($request)
     {
 
@@ -32,12 +40,23 @@ class Controller extends BaseController
             'login' => $request->login,
             'role_id' => $request->role_id,
             'verefi_code' => $code,
+            'full_name' => $request->full_name
 
         ];
         return $data;
     }
 
-
+    /**
+     * Генерация сообщения для регистрации данных для регистрации
+     *
+     * @param  $request
+     * @param  $link
+     * @param  $code
+     *
+     * @return null
+     *
+     *
+     */
     public function messageUser($request, $link, $code)
     {
 
@@ -48,7 +67,16 @@ class Controller extends BaseController
 
             });
     }
-
+    /**
+     * Проверка подтверждения почты
+     *
+     * @param  $response
+     *
+     *
+     * @return boolean
+     *
+     *
+     */
     public function verificationUserCheck($response)
     {
         $verifed_email = [
@@ -65,25 +93,48 @@ class Controller extends BaseController
         }
 
     }
-
+    /**
+     * Проверка уникальности логина
+     *
+     * @param  $request
+     *
+     *
+     * @return boolean
+     *
+     *
+     */
     public function checkUniqueLoginUser($request)
     {
         $flag = true;
 
-        if(User::where('login', '=' , $request)->get()->count() > 0){
+        if (User::where('login', '=', $request)->get()->count() > 0) {
             $flag = false;
         }
 
         return $flag;
     }
-
+    /**
+     * Проверка уникальности почты
+     *
+     * @param  $request
+     *
+     *
+     * @return boolean
+     *
+     *
+     */
     public function checkUniqueEmailUser($request)
     {
         $flag = true;
-        if(User::where('email', '=' , $request)->get()->count() > 0){
+        if (User::where('email', '=', $request)->get()->count() > 0) {
             $flag = false;
         }
         return $flag;
 
+    }
+ // функция ниже для хероку
+    public function check()
+    {
+        return \response()->json('ok', 200);
     }
 }
