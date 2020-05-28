@@ -26,6 +26,7 @@ class ApplicationController extends Controller
      */
     public function index()
     {
+
         return $this->sendResponse(Application::orderBy('id', 'DESC')
             ->where('status', '=', 0)
             ->get(), '200 OK', 200);
