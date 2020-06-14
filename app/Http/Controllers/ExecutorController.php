@@ -40,7 +40,7 @@ class ExecutorController extends Controller
         $model = Executor::where('user_id', '=', $user->id)->where('request_id', '=', $request->request_id)->get();
         $model_delete = Executor::where('user_id', '!=', $user->id)->delete();
         $application = Application::where('id', '=', $request->request_id)->get()->first();
-        $application->status = 1;
+        $application->status = 2;
         $application->save();
         $model->first()->executor_chose = 1;
         $model->first()->save();

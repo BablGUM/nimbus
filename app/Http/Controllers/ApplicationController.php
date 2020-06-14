@@ -28,7 +28,7 @@ class ApplicationController extends Controller
     {
 
         return $this->sendResponse(Application::orderBy('id', 'DESC')
-            ->where('status', '=', 0)
+            ->where('status', '=', 1)
             ->get(), '200 OK', 200);
     }
     /**
@@ -47,7 +47,7 @@ class ApplicationController extends Controller
             $category_id = Application::find($id)->category_id;
             $category = Category::where('id', '=', $category_id)->get()->first()->name;
             $mediator_request = Mediator::where('request_id', '=', $id)->get()->first();
-            $mediator = User::find($mediator_request->user_id);
+                $mediator = User::find($mediator_request->user_id);
             $user_client = User::find(Application::find($id)->first()->user_id);
             $request_executor = Executor::where('request_id', '=', $id)->get();
             $executors = $application->generateArrayToExecutors($request_executor,$id);
@@ -73,7 +73,8 @@ class ApplicationController extends Controller
         $app = new Application();
         $model = new FileController();
         $mediator = new Application();
-        $data = $app->checkFile($request, $app, $model, $user);
+        $method = 'create';
+        $data = $app->checkFile($request, $app, $model, $user,$method);
         $mediator->getMediatorsAndSetToApplication($data->id);
 
         return $this->sendResponse($data, '201 CREATED', 201);
@@ -109,5 +110,24 @@ class ApplicationController extends Controller
             $user->id)->delete();
 
         return $this->sendResponse(true, 'delete request', 200);
+    }
+
+    public function endRequest(Request $request,$id)
+    {
+        $application = Application::where('id', '=', $id)->get()->first();
+        $application->status = 3;
+        $application->save();
+        return response()->json(true, 200);
+
+    }
+
+
+    public function startRequest(Request $request,$id)
+    {
+        $application = Application::where('id', '=', $id)->get()->first();
+        $application->status = 1;
+        $application->save();
+        return response()->json(true, 200);
+
     }
 }

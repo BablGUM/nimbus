@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Document;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Filesystem\Filesystem;
 
@@ -44,18 +46,65 @@ class FileController extends Controller
      *
      * @Rest\Get("/file/check")
      */
-    public function fileSave(Request $request,$user)
+    public function fileSave(Request $request,$user,$path_to)
     {
+        if(!$path_to) {
 
+
+            $file = new Filesystem();
+            $fileName = $request->file->getClientOriginalName();
+            $fileName = str_replace(" ", "", $fileName);
+            $code = \Illuminate\Support\Str::random(10);
+
+            $file->makeDirectory(public_path('/file/' . $code), 0777, true, true);
+
+            $path = $request->file('file')->move(public_path('/file/' . $code), $fileName);
+            $photoURL = '/file/' . $code . '/' . $fileName;
+
+            return $photoURL;
+        }
+        else {
+            $file = new Filesystem();
+            $fileName = $request->file->getClientOriginalName();
+            $fileName = str_replace(" ", "", $fileName);
+            $code = substr($path_to,6,10);
+            $file->delete(public_path($path_to));
+            $path = $request->file('file')->move(public_path('/file/' . $code), $fileName);
+
+            $photoURL = '/file/' . $code . '/' . $fileName;
+            return $photoURL;
+        }
+    }
+
+
+    public function uploadFileInRequest(Request $request, $id)
+    {
         $file = new Filesystem();
         $fileName = $request->file->getClientOriginalName();
-        $code = \Illuminate\Support\Str::random(10);
+        $fileName = str_replace(" ", "", $fileName);
+        $file->makeDirectory(public_path('/request/' . $id), 0777, true, true);
+        $path = $request->file('file')->move(public_path('/request/' . $id), $fileName);
+        $photoURL = '/request/' . $id . '/' . $fileName;
+        $doc = \App\Document::where('path_to', '=', $photoURL)->count();
+        if ($doc > 0) {
+            return response()->json('Файл с таким названием уже существует', 401);
+        } else {
+            $data = [
+                'request_id' => $id,
+                'path_to' => $photoURL,
+                'name_file' => $fileName
+            ];
+            $data = \App\Document::create($data);
+            return $this->sendResponse($data, 'ok', 200);
+        }
 
-        $file->makeDirectory(public_path('/file/'.$code),0777,true,true);
+    }
 
-        $path = $request->file('file')->move(public_path('/file/'.$code), $fileName);
-        $photoURL  = '/file/'.$code.'/'.$fileName;
-        return $photoURL;
+    public function index($id)
+    {
+        $doc = Document::where('request_id','=',$id)->get();
+
+        return $this->sendResponse($doc,'OK',200);
     }
 
 

@@ -105,8 +105,11 @@ class UserController extends Controller
                     'login' => $user->login,
                     'email' => $user->email,
                     'full_name' => $user->full_name,
+                    'first_name' => $user->first_name,
+                    'role' => $roles,
                     'token' => $token,
-                    'role' => $roles
+
+
                 ],
                 200
             );
@@ -235,11 +238,11 @@ class UserController extends Controller
      *
      * @Rest\Post("/user")
      */
-    public function edit(Request $request){
+    public function edit(UserAddRequest $request){
         $user = Auth::user();
         $data = array_merge(request()->all(),
             [
-                'full_name' => $request->last_name . " " .$request->first_name . " " . $request->patronymic
+                'full_name' => $request->last_name . " " .$request->first_name . " " . $request->patronymic,
             ]);
 
         $user->update($data);

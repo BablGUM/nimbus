@@ -31,5 +31,11 @@ use Illuminate\Support\Facades\Route;
             Route::delete('rejection', 'ExecutorController@rejectionExecutor'); // отказ исполнителя
             Route::delete('request', 'ApplicationController@deleteRequest'); // удаление заявки
             Route::get('id/client-chose','ExecutorController@countChose'); // id заказов где исполнитель выбран
+            Route::get('request/end/{id}','ApplicationController@endRequest'); // завершение заказа
+            Route::post('mediator/request/{id}', 'MediatorController@edit'); // редактирование заказа от посредника
+            Route::get('request/start/{id}','ApplicationController@startRequest'); // статус с нового в активный
+            Route::post('request/{id}/file','FileController@uploadFileInRequest'); // загрузка документов в заказ
+            Route::get('request/{id}/documents','FileController@index');
+
         }
     );

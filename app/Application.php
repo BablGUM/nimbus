@@ -57,6 +57,7 @@ class Application extends Model
             'end_date' =>  Carbon::createFromFormat('d.m.Y', $request->end_date)->format('Y-m-d'),
             'category_id' => $category_id
         ];
+
         return $data;
     }
     /**
@@ -67,20 +68,36 @@ class Application extends Model
      * @param $model
      *  @param $user
      *
-     * @return array
      *
      */
-    public function checkFile($request, $app, $model, $user)
+    public function checkFile($request, $app, $model, $user,$method)
     {
-        if ($request->file) {
-            $data = Application::create($app->generateArrayRequestApplication($request,
-                $user->id,
-                $model->fileSave($request, $user)));
-        } else {
-            $fileUrl = null;
-            $data = Application::create($app->generateArrayRequestApplication($request, $user->id, $fileUrl));
+        if ($method == 'create'){
+            if ($request->file) {
+                $data = Application::create($app->generateArrayRequestApplication($request,
+                    $user->id,
+                    $model->fileSave($request, $user,null)));
+            } else {
+                $fileUrl = null;
+                $data = Application::create($app->generateArrayRequestApplication($request, $user->id, $fileUrl));
+            }
+            return $data;
         }
-        return $data;
+        if ($method == 'edit' ){
+
+            if ($request->file) {
+
+                $data = Application::update($app->generateArrayRequestApplication($request,
+                    $user->id,
+                    $model->fileSave($request, $user,$app->path_to)));
+
+            } else {
+                $fileUrl = null;
+                $data = Application::update($app->generateArrayRequestApplication($request, $user->id, $fileUrl));
+
+            }
+            return $data;
+        }
     }
     /**
      * Метод добавление случайного посредника из всех посредников
@@ -181,6 +198,7 @@ class Application extends Model
                 [
                     'id' => User::where('id', '=', $item)->get()->first()->id,
                     'full_name' => User::where('id', '=', $item)->get()->first()->full_name,
+                    'first_name' => User::where('id', '=', $item)->get()->first()->first_name,
                     'client_chose' => Executor::where('request_id', '=', $id)
                         ->where('user_id', '=', $item)->get()->first()->client_chose,
                     'executor_chose' => Executor::where('request_id', '=', $id)
