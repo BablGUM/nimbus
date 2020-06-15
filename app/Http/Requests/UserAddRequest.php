@@ -16,7 +16,9 @@ class UserAddRequest extends ApiRequest
     {
         return [
 
-
+            'last_name' => 'required',
+            'first_name' => 'required',
+            'patronomyc' => 'required',
             'password' =>  'required|confirmed|min:6|max:16|alpha_dash',
             'password_confirmation' => 'required|min:6|max:16|alpha_dash',
             'email' => 'required|email|unique:users|min:5|max:50',

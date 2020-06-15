@@ -14,19 +14,28 @@ class ExecutorController extends Controller
 {
     public function store($id)
     {
-        $user = Auth::user();
-        $data = [
-            'request_id' => $id,
-            'user_id' => $user->id,
 
-        ];
-        $executor = Executor::create($data);
-        return $this->sendResponse($executor, 'Create', 201);
+        $user = Auth::user();
+        $model = Executor::where('user_id', '=', $user->id)->where('request_id', '=', $id)->get();
+        if ($model->count() > 0) {
+            return $this->sendError('Вы уже откликнулись', 401, ['Нельзя откликнутся несколько раз']);
+        } else {
+            $data = [
+                'request_id' => $id,
+                'user_id' => $user->id,
+
+            ];
+            $executor = Executor::create($data);
+            return $this->sendResponse($executor, 'Create', 201);
+        }
     }
 
     public function consetClient(Request $request, $id)
     {
         $model = Executor::where('user_id', '=', $id)->where('request_id', '=', $request->request_id)->get();
+
+
+
         $model->first()->client_chose = 1;
         $model->first()->save();
 

@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Role;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserAddRequest;
+use App\Http\Requests\UserEditRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -238,7 +239,7 @@ class UserController extends Controller
      *
      * @Rest\Post("/user")
      */
-    public function edit(UserAddRequest $request){
+    public function edit(UserEditRequest $request){
         $user = Auth::user();
         $data = array_merge(request()->all(),
             [

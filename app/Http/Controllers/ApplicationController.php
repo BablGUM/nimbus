@@ -109,7 +109,14 @@ class ApplicationController extends Controller
         $delete_request = Application::where('id', '=', $request->request_id)->where('user_id', '=',
             $user->id)->delete();
 
-        return $this->sendResponse(true, 'delete request', 200);
+        if($delete_request > 0){
+            $delete_request_mediators = Mediator::where('request_id','=',$request->request_id)->delete();
+            $delete_request_executors = Executor::where('request_id','=',$request->request_id)->delete();
+            return $this->sendResponse(true, 'delete request', 200);
+        }
+
+
+        return $this->sendResponse(false, 'not delete request', 404);
     }
 
     public function endRequest(Request $request,$id)
