@@ -31,18 +31,20 @@ class UserController extends Controller
     {
         $roles = Role::where('role_name', '=', $request->role)->get()->first()->id;
         $request->role_id = $roles;
-        if($request->role == 'Посредник'){
-            $request->role_id = 'asdasd';
+        if(strtolower($request->role) == 'посредник'){
+            return $this->sendResponse('Регистрация не прошла', 'Bad Request', 400);
         }
-        $data = $request->validated();
+        else{
+            $data = $request->validated();
 
-        $user = User::create($this->generateArrayRequest($request));
+            $user = User::create($this->generateArrayRequest($request));
 
-        $route = $request->route;
-        $link = $route . '?verification_code=' . $user->verefi_code;
-        $this->messageUser($request, $link, $user->verefi_code);
+            $route = $request->route;
+            $link = $route . '?verification_code=' . $user->verefi_code;
+            $this->messageUser($request, $link, $user->verefi_code);
 
-        return $this->sendResponse($user, 'Created', 201);
+            return $this->sendResponse($user, 'Created', 201);
+        }
     }
 
     /**

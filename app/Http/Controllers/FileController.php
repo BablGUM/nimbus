@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Document;
+use App\File;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Auth;
@@ -80,15 +81,23 @@ class FileController extends Controller
     public function uploadFileInRequest(Request $request, $id)
     {
         $file = new Filesystem();
+        $fileMethod = new File();
+        $fileContract = $request->fileContract;
+        $fileReports = $request->fileReports;
+        $fileOthers = $request->fileOthers;
+
         $fileName = $request->file->getClientOriginalName();
         $fileName = str_replace(" ", "", $fileName);
-        $file->makeDirectory(public_path('/request/' . $id), 0777, true, true);
-        $path = $request->file('file')->move(public_path('/request/' . $id), $fileName);
         $photoURL = '/request/' . $id . '/' . $fileName;
         $doc = \App\Document::where('path_to', '=', $photoURL)->count();
         if ($doc > 0) {
             return response()->json('Файл с таким названием уже существует', 401);
         } else {
+            $file->makeDirectory(public_path('/request/' . $id), 0777, true, true);
+            $file->makeDirectory(public_path('/request/' . $id . '/contract'), 0777, true, true);
+            $file->makeDirectory(public_path('/request/' . $id . '/reports'), 0777, true, true);
+            $file->makeDirectory(public_path('/request/' . $id . '/others'), 0777, true, true);
+            $path = $request->file('file')->move(public_path('/request/' . $id), $fileName);
             $data = [
                 'request_id' => $id,
                 'path_to' => $photoURL,

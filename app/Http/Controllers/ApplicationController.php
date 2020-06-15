@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Category;
 use Illuminate\Support\Arr;
 use App\Executor;
+use Illuminate\Filesystem\Filesystem;
 
 class ApplicationController extends Controller
 {
@@ -106,16 +107,21 @@ class ApplicationController extends Controller
     public function deleteRequest(Request $request)
     {
         $user = Auth::user();
+        $file = new Filesystem();
+        $path = Application::where('id', '=', $request->request_id)->where('user_id', '=',
+            $user->id)->get()->first()->path_to;
         $delete_request = Application::where('id', '=', $request->request_id)->where('user_id', '=',
             $user->id)->delete();
 
         if($delete_request > 0){
             $delete_request_mediators = Mediator::where('request_id','=',$request->request_id)->delete();
             $delete_request_executors = Executor::where('request_id','=',$request->request_id)->delete();
+            if(!is_null($path)){
+                $path_delete = mb_substr($path,0,16);
+                $file->deleteDirectory(public_path($path_delete));
+            }
             return $this->sendResponse(true, 'delete request', 200);
         }
-
-
         return $this->sendResponse(false, 'not delete request', 404);
     }
 
