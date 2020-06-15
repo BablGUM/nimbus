@@ -33,7 +33,7 @@ class UserController extends Controller
         $request->role_id = $roles;
 
 
-        if(strtolower($request->role) == 'посредник'){
+        if(mb_strtolower($request->role) == 'посредник'){
             return $this->sendResponse('Регистрация не прошла', 'Bad Request', 400);
         }
         else{
