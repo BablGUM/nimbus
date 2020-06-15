@@ -31,6 +31,8 @@ class UserController extends Controller
     {
         $roles = Role::where('role_name', '=', $request->role)->get()->first()->id;
         $request->role_id = $roles;
+
+
         if(strtolower($request->role) == 'посредник'){
             return $this->sendResponse('Регистрация не прошла', 'Bad Request', 400);
         }
