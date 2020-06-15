@@ -12,8 +12,9 @@ class UserEditRequest extends ApiRequest
     {
         return [
 
-            "last_name" => 'required',
-            'first_name' => 'required',
+            'last_name' => 'required|min:2|max:50',
+            'first_name' => 'required|min:2|max:50',
+            'patronomyc' => 'min:2|max:50',
             "phone" => 'required',
             "residence_address" => 'required',
             'login' => 'required|unique:users|min:3|max:55'
