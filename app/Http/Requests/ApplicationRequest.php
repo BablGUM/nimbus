@@ -20,7 +20,7 @@
                 'budget' => 'required|int|min:1|max:1000000000',
                 'start_date' => 'required|date',
                 'end_date' => 'required|date',
-                'file' => 'mimes:docx,doc,dot,pdf|max:5120',
+                'file' => 'mimes:docx,doc,dot,pdf|max:2048',
                 'name_category' => 'required'
 
             ];
