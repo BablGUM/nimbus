@@ -13,11 +13,13 @@ use Illuminate\Support\Facades\Auth;
 use App\Category;
 use Illuminate\Support\Arr;
 use App\Executor;
+use App\Http\Requests\ApplicationEditRequest;
 
 class MediatorController extends Controller
 {
-    public function edit(Request $request,$id)
+    public function edit(ApplicationEditRequest $request,$id)
     {
+
         $application = Application::findOrFail($id);
         $user = Auth::user();
 

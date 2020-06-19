@@ -42,9 +42,18 @@ class Application extends Model
      * @return array
      *
      */
-    public function generateArrayRequestApplication($request, $id, $fileUrl)
+    public function generateArrayRequestApplication($request, $id, $fileUrl,$app)
     {
-        $category_id = Category::where('name', '=', $request->name_category)->get()->first()->id;
+
+        if($request->name_category){
+            $category_id = Category::where('name', '=', $request->name_category)->get()->first()->id;
+
+        }
+        else{
+           $category_id = $app->category_id;
+        }
+
+
 
         $data = [
             'title' => $request->title,
@@ -76,10 +85,10 @@ class Application extends Model
             if ($request->file) {
                 $data = Application::create($app->generateArrayRequestApplication($request,
                     $user->id,
-                    $model->fileSave($request, $user,null)));
+                    $model->fileSave($request, $user,null),null));
             } else {
                 $fileUrl = null;
-                $data = Application::create($app->generateArrayRequestApplication($request, $user->id, $fileUrl));
+                $data = Application::create($app->generateArrayRequestApplication($request, $user->id, $fileUrl,null));
             }
             return $data;
         }
@@ -89,10 +98,10 @@ class Application extends Model
 
                 $data = Application::update($app->generateArrayRequestApplication($request,
                     $app->user_id,
-                    $model->fileSave($request, $user,$app->path_to)));
+                    $model->fileSave($request, $user,$app->path_to),$app));
 
             } else {
-                $data = Application::update($app->generateArrayRequestApplication($request,   $app->user_id, $app->path_to));
+                $data = Application::update($app->generateArrayRequestApplication($request,   $app->user_id, $app->path_to,$app));
 
             }
             return $data;
