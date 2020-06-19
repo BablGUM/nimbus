@@ -15,7 +15,7 @@
         public function rules()
         {
             return [
-                'title' => 'required|max:100',
+                'title' => 'required|max:255',
                 'description' => 'required|max:2000',
                 'budget' => 'required|int|min:1|max:1000000000',
                 'start_date' => 'required|date',

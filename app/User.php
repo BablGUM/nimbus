@@ -23,7 +23,7 @@ class User extends Authenticatable
         'full_name',
         'first_name',
         'last_name',
-        'patronomyc',
+        'patronymic',
         'phone',
         'residence_address',
         'password',

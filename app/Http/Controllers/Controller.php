@@ -40,10 +40,10 @@ class Controller extends BaseController
             'login' => $request->login,
             'role_id' => $request->role_id,
             'verefi_code' => $code,
-            'full_name' => $request->last_name . " " .$request->first_name . " " . $request->patronomyc,
+            'full_name' => $request->last_name . " " .$request->first_name . " " . $request->patronymic,
             'first_name' => $request->first_name,
             'last_name'  => $request->last_name,
-            'patronomyc'  => $request->patronomyc,
+            'patronymic'  => $request->patronymic,
 
         ];
         return $data;

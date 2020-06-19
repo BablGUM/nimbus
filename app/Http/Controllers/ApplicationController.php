@@ -125,6 +125,11 @@ class ApplicationController extends Controller
         return $this->sendResponse(false, 'not delete request', 404);
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function endRequest(Request $request,$id)
     {
         $application = Application::where('id', '=', $id)->get()->first();
@@ -134,7 +139,11 @@ class ApplicationController extends Controller
 
     }
 
-
+    /**
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function startRequest(Request $request,$id)
     {
         $application = Application::where('id', '=', $id)->get()->first();

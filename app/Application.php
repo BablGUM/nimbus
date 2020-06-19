@@ -88,12 +88,11 @@ class Application extends Model
             if ($request->file) {
 
                 $data = Application::update($app->generateArrayRequestApplication($request,
-                    $user->id,
+                    $app->user_id,
                     $model->fileSave($request, $user,$app->path_to)));
 
             } else {
-                $fileUrl = null;
-                $data = Application::update($app->generateArrayRequestApplication($request, $user->id, $fileUrl));
+                $data = Application::update($app->generateArrayRequestApplication($request,   $app->user_id, $app->path_to));
 
             }
             return $data;
