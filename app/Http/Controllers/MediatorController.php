@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\File;
 use App\Mediator;
 use App\User;
 use Illuminate\Http\Request;
@@ -26,11 +27,20 @@ class MediatorController extends Controller
         $model = new FileController();
         $method = 'edit';
         $data = $application->checkFile($request, $application, $model, $user,$method);
-//        $application->update($request->all());
-//        $application->save();
         return $this->sendResponse($application, $data, 200);
     }
 
+    public function downloadFile(Request $request,$id)
+    {
+
+        $application = Application::findOrFail($id);
+        $model = new FileController();
+        $url = $model->fileSave($request, $application->user_id, $application->path_to);
+        $application->path_to = $url;
+        $application->save();
+
+        return $this->sendResponse($application,'ok',200);
+    }
 
 
 

@@ -1,10 +1,5 @@
 <?php
-    /**
-     * Created by PhpStorm.
-     * User: я
-     * Date: 19.06.2020
-     * Time: 17:07
-     */
+
 
 namespace App\Http\Requests;
 

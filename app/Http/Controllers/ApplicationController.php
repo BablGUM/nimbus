@@ -152,4 +152,6 @@ class ApplicationController extends Controller
         return response()->json(true, 200);
 
     }
+
+
 }

@@ -96,7 +96,7 @@ class User extends Authenticatable
         Mail::send(['html' => 'reset'], ['name' => $request->login, 'link' => $link, 'code' => $request->reset_code],
             function ($message) use ($request, $link) {
                 $message->to($request->email, $request->email)->subject('Восстановление пароля');
-                $message->from('technical.platformss@gmail.com', 'Technical Platform');
+                $message->from('technical.platformss@gmail.com', 'Строительная Биржа «Строитель.ру»');
 
             });
 

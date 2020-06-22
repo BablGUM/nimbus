@@ -45,7 +45,7 @@ class FileController extends Controller
      *
      * @return mixed
      *
-     * @Rest\Get("/file/check")
+     * @Rest\Get("/file/download")
      */
     public function fileSave(Request $request,$user,$path_to)
     {
@@ -115,6 +115,9 @@ class FileController extends Controller
 
         return $this->sendResponse($doc,'OK',200);
     }
+
+
+
 
 
 }

@@ -69,15 +69,15 @@ class Application extends Model
 
         return $data;
     }
+
     /**
-     * Метод для проверки загрузки файла
-     *
+     * Метод создания или редактирование заказа
      * @param $request
      * @param $app
      * @param $model
-     *  @param $user
-     *
-     *
+     * @param $user
+     * @param $method
+     * @return bool
      */
     public function checkFile($request, $app, $model, $user,$method)
     {
@@ -111,19 +111,50 @@ class Application extends Model
      * Метод добавление случайного посредника из всех посредников
      *
      * @param $id_request
-
-     * @return void
      *
      */
     public function getMediatorsAndSetToApplication($id_request)
     {
-        $mediator_id = User::where('role_id', '=', 3)->get()->random()->id;
+        $mediators = Mediator::all()->pluck('user_id');
+        $countArray = count($mediators);
+        if($countArray == 0){
+            $mediator_id = User::where('role_id', '=', 3)->get()->random()->id;
+        }
+        else {
+            $num = $mediators[0];
+            $max_frq = 1;
+            for($i = 0;$i < $countArray - 1;$i++){
+                $frq = 1;
+                for ($k = 0;$k < $i+1;$k++){
+                    if ($mediators[$i] == $mediators[$k]){
+                        $frq += 1;
+                    }
+                    if ($frq > $max_frq){
+                        $max_frq = $frq;
+                        $num = $mediators[$i];
+                    }
+                }
+            }
+           if ($max_frq > 1)
+           {
+               $mediator_id = User::where('role_id', '=', 3)->where('id','!=',$num)->get()->random()->id;
+               $mediators_array = User::where('role_id', '=', 3)->get()->pluck('id');
+               $mediators_array = $mediators_array->diff($mediators);
+                $count = count($mediators_array->all());
+                if ($count > 0){
+                    $mediator_id = $mediators_array->first();
+                }
+
+           }
+
+        }
         $dataInput = [
             'request_id' => $id_request,
             'user_id' => $mediator_id
 
         ];
-        $data = Mediator::create($dataInput);
+
+        return Mediator::create($dataInput);
     }
     /**
      * Метод создания массива всех заказов в личный кабинет в зависимости от роли

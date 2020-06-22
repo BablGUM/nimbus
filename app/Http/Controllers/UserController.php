@@ -31,14 +31,11 @@ class UserController extends Controller
     {
         $roles = Role::where('role_name', '=', $request->role)->get()->first()->id;
         $request->role_id = $roles;
-
-
         if(mb_strtolower($request->role) == 'посредник'){
             return $this->sendResponse('Регистрация не прошла', 'Bad Request', 400);
         }
         else{
             $data = $request->validated();
-
             $user = User::create($this->generateArrayRequest($request));
 
             $route = $request->route;
@@ -174,7 +171,7 @@ class UserController extends Controller
             Mail::send(['html' => 'password'], ['name' => $user->login],
                 function ($message) use ($request, $user) {
                     $message->to($user->email, $user->email)->subject('Изменение пароля');
-                    $message->from('technical.platformss@gmail.com', 'Technical Platform');
+                    $message->from('technical.platformss@gmail.com', 'Строительная Биржа «Строитель.ру»');
 
                 });
             return response()->json(true, 200);

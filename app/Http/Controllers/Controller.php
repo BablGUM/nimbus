@@ -44,6 +44,7 @@ class Controller extends BaseController
             'first_name' => $request->first_name,
             'last_name'  => $request->last_name,
             'patronymic'  => $request->patronymic,
+            'phone' => $request->phone,
 
         ];
         return $data;
@@ -66,7 +67,7 @@ class Controller extends BaseController
         Mail::send(['html' => 'mail'], ['name' => $request->login, 'link' => $link, 'code' => $code],
             function ($message) use ($request, $link) {
                 $message->to($request->email, $request->email)->subject('Подтвердите ваш адрес эл-почты');
-                $message->from('technical.platformss@gmail.com', 'Technical Platform');
+                $message->from('technical.platformss@gmail.com', 'Строительная Биржа «Строитель.ру»');
 
             });
     }
@@ -135,6 +136,9 @@ class Controller extends BaseController
         return $flag;
 
     }
+
+
+
  // функция ниже для хероку
     public function check()
     {
