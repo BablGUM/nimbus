@@ -9,6 +9,7 @@ use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Filesystem\Filesystem;
 use function PHPSTORM_META\type;
+use Spatie\Image\Image;
 
 class FileController extends Controller
 {
@@ -51,8 +52,6 @@ class FileController extends Controller
     public function fileSave(Request $request,$user,$path_to)
     {
         if(!$path_to) {
-
-
             $file = new Filesystem();
             $fileName = $request->file->getClientOriginalName();
             $fileName = str_replace(" ", "", $fileName);
@@ -81,49 +80,71 @@ class FileController extends Controller
 
     public function uploadFileInRequest(Request $request, $id)
     {
+        if($request->type == 'doc')
+        {
+            $file_s = new Filesystem();
+            $size = count($_FILES['files']['name']);
+            $value = $size + \App\Document::where('request_id', '=', $id)->count();
+            if($request->hasfile('files')) {
+                foreach ($request->files as $file) {
+                    for($j = 0;$j < $size;$j++){
+                        $fileName =  $value . '.' . $file[$j]->getClientOriginalExtension();
+                        $value = $value + 1;
+                        $originalName = str_replace(" ", "",$file[$j]->getClientOriginalName());
+                        $photoURL = '/request/' . $id . '/' . $fileName;
+                        $file_s->makeDirectory(public_path('/request/' . $id . '/documents/'),
+                            0777, true, true);
+                        $data = [
+                            'request_id' => $id,
+                            'path_to' => $photoURL,
+                            'name_file' => $originalName,
+                            'type' => 'doc',
+                        ];
+                        $file[$j]->move(public_path('/request/' . $id . '/documents/'), $fileName);
+                        Document::create($data);
 
-        if($request->hasfile('files')) {
-            $paths = [];
-            foreach ($request->files as $file) {
-
-//                $this->validate($image, [
-//                    'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-//                ]);
-
-                $imageName = time() . '.' . $file->getClientOriginalExtension();
-                $file->move(public_path('files'), $imageName);
-                $paths[] = $imageName;
-                dd($paths);
-
+                    }
+                }
+            }
+        }
+        if ($request->type == 'reports')
+        {
+            $file_s = new Filesystem();
+            $size = count($_FILES['files']['name']);
+            $value = $size + \App\Document::where('request_id', '=', $id)->count();
+            if($request->hasfile('files')) {
+                foreach ($request->files as $file) {
+                    for($j = 0;$j < $size;$j++){
+                        $fileName =  $value . '.' . $file[$j]->getClientOriginalExtension();
+                        $value = $value + 1;
+                        $originalName = str_replace(" ", "",$file[$j]->getClientOriginalName());
+                        $photoURL = '/request/' . $id . '/' . $fileName;
+                        $file_s->makeDirectory(public_path('/request/' . $id . '/reports/'),
+                            0777, true, true);
+                        $data = [
+                            'request_id' => $id,
+                            'path_to' => $photoURL,
+                            'name_file' => $originalName,
+                            'type' => 'doc',
+                        ];
+                        $file[$j]->move(public_path('/request/' . $id . '/reports/'), $fileName);
+                        Document::create($data);
+                    }
+                }
             }
         }
 
-//        $fileName = $request->file->getClientOriginalName();
-//        $fileName = str_replace(" ", "", $fileName);
-//        $photoURL = '/request/' . $id . '/' . $fileName;
-//        $doc = \App\Document::where('path_to', '=', $photoURL)->count();
-//        if ($doc > 0) {
-//            return response()->json('Файл с таким названием уже существует', 401);
-//        } else {
-//            $file->makeDirectory(public_path('/request/' . $id), 0777, true, true);
-//            $file->makeDirectory(public_path('/request/' . $id . '/contract'), 0777, true, true);
-//            $file->makeDirectory(public_path('/request/' . $id . '/reports'), 0777, true, true);
-//            $file->makeDirectory(public_path('/request/' . $id . '/others'), 0777, true, true);
-//            $path = $request->file('file')->move(public_path('/request/' . $id), $fileName);
-//            $data = [
-//                'request_id' => $id,
-//                'path_to' => $photoURL,
-//                'name_file' => $fileName
-//            ];
-//            $data = \App\Document::create($data);
-//            return $this->sendResponse($data, 'ok', 200);
-//        }
-
     }
 
-    public function index($id)
+    public function index(Request $request,$id)
     {
-        $doc = Document::where('request_id','=',$id)->get();
+        if ($request->type == 'doc'){
+            $doc = Document::where('request_id','=',$id)->where('type','=',$request->type)->get();
+        }
+
+        if ($request->type == 'reports'){
+            $doc = Document::where('request_id','=',$id)->where('type','=',$request->type)->get();
+        }
 
         return $this->sendResponse($doc,'OK',200);
     }
