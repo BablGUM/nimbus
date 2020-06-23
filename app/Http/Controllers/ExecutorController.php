@@ -21,10 +21,11 @@ class ExecutorController extends Controller
     public function store($id)
     {
 
-        $user = Auth::user();
-        $model = Executor::where('user_id', '=', $user->id)->where('request_id', '=', $id)->get();
+        $users = Auth::user();
+        $model = Executor::where('user_id', '=', $users->id)->where('request_id', '=', $id)->get();
+
         if ($model->count() > 0) {
-            return $this->sendError('Вы уже откликнулись', 401, ['Нельзя откликнутся несколько раз']);
+            return $this->sendError('Вы уже откликнулись', 403, ['Нельзя откликнутся несколько раз']);
         } else {
             $app = Application::where('id','=',$id)->get()->first();
             $user = User::where('id','=',$app->user_id)->get()->first();
