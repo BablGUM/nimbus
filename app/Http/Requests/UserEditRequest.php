@@ -16,7 +16,6 @@ class UserEditRequest extends ApiRequest
             'first_name' => 'min:2|max:55',
             'login' => 'min:3|max:55'
 
-
         ];
     }
 
