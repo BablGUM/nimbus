@@ -22,6 +22,7 @@ class ExecutorController extends Controller
     {
 
         $users = Auth::user();
+
         $model = Executor::where('user_id', '=', $users->id)->where('request_id', '=', $id)->get();
 
         if ($model->count() > 0) {
@@ -35,7 +36,7 @@ class ExecutorController extends Controller
 
             $data = [
                 'request_id' => $id,
-                'user_id' => $user->id,
+                'user_id' => $users->id,
 
             ];
             $executor = Executor::create($data);

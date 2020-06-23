@@ -86,7 +86,6 @@ class FileController extends Controller
             $paths = [];
             foreach ($request->files as $file) {
 
-
 //                $this->validate($image, [
 //                    'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
 //                ]);
