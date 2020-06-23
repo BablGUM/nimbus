@@ -18,12 +18,11 @@ class UserAddRequest extends ApiRequest
 
             'last_name' => 'required|min:2|max:55',
             'first_name' => 'required|min:2|max:55',
-            'patronymic' => 'min:2|max:55',
             'password' =>  'required|confirmed|min:6|max:16',
             'password_confirmation' => 'required|min:6|max:16',
             'email' => 'required|email|unique:users|min:5|max:50',
             'login' => 'required|unique:users|min:3|max:55',
-            'phone' => 'required',
+
 
 
         ];
