@@ -82,16 +82,17 @@ class FileController extends Controller
     {
         if($request->type == 'doc')
         {
+            $count = \App\Document::where('request_id', '=', $id)->count();
             $file_s = new Filesystem();
             $size = count($_FILES['files']['name']);
-            $value = $size + \App\Document::where('request_id', '=', $id)->count();
+            $value = $size + $count;
             if($request->hasfile('files')) {
                 foreach ($request->files as $file) {
                     for($j = 0;$j < $size;$j++){
                         $fileName =  $value . '.' . $file[$j]->getClientOriginalExtension();
                         $value = $value + 1;
                         $originalName = str_replace(" ", "",$file[$j]->getClientOriginalName());
-                        $photoURL = '/request/' . $id . '/' . $fileName;
+                        $photoURL = '/request/' . $id . '/documents' .'/' . $fileName;
                         $file_s->makeDirectory(public_path('/request/' . $id . '/documents/'),
                             0777, true, true);
                         $data = [
@@ -118,7 +119,7 @@ class FileController extends Controller
                         $fileName =  $value . '.' . $file[$j]->getClientOriginalExtension();
                         $value = $value + 1;
                         $originalName = str_replace(" ", "",$file[$j]->getClientOriginalName());
-                        $photoURL = '/request/' . $id . '/' . $fileName;
+                        $photoURL = '/request/' . $id . '/reports' . '/' . $fileName;
                         $file_s->makeDirectory(public_path('/request/' . $id . '/reports/'),
                             0777, true, true);
                         $data = [
