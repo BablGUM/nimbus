@@ -168,7 +168,8 @@ class Application extends Model
     {
         $user = Auth::user()->role_id;
         if ($user == 1) {
-            $request = Application::where('user_id', '=', $id)->get();
+            $request = Application::select("id","title","description","budget","status","created_at")
+                ->orderBy('id', 'DESC')->where('user_id', '=', $id)->get();
         }
         if ($user == 2) {
             $request = Executor::where('user_id', '=', $id)->with('request')->get()

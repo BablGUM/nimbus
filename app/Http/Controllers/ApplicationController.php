@@ -28,9 +28,11 @@ class ApplicationController extends Controller
     public function index()
     {
 
-        return $this->sendResponse(Application::orderBy('id', 'DESC')
-            ->where('status', '=', 1)
-            ->get(), '200 OK', 200);
+        return $this->sendResponse(
+            Application::select("id","title","description","budget","status","created_at")
+                ->orderBy('id', 'DESC')
+                ->where('status', '=', 1)
+                ->get(), '200 OK', 200);
     }
     /**
      * Вывод заказа подробнее ( Выводятся не только заказы но и список заказчиков посредников и исполнителей на заказе)
