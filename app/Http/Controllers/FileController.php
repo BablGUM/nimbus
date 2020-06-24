@@ -80,6 +80,7 @@ class FileController extends Controller
 
     public function uploadFileInRequest(Request $request, $id)
     {
+
         if($request->type == 'doc')
         {
             $count = \App\Document::where('request_id', '=', $id)->count();
@@ -126,7 +127,7 @@ class FileController extends Controller
                             'request_id' => $id,
                             'path_to' => $photoURL,
                             'name_file' => $originalName,
-                            'type' => 'doc',
+                            'type' => 'reports',
                         ];
                         $file[$j]->move(public_path('/request/' . $id . '/reports/'), $fileName);
                         Document::create($data);
