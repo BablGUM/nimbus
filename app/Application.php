@@ -172,12 +172,16 @@ class Application extends Model
                 ->orderBy('id', 'DESC')->where('user_id', '=', $id)->get();
         }
         if ($user == 2) {
-            $request = Executor::where('user_id', '=', $id)->with('request')->get()
+            $request = Executor::where('user_id', '=', $id)
+                ->with('request:id,title,description,budget,status,created_at')
+                ->get()
                 ->pluck('request');
 
         }
         if ($user == 3) {
-            $request = Mediator::where('user_id', '=', $id)->with('request')->get()
+            $request = Mediator::where('user_id', '=', $id)
+                ->with('request:id,title,description,budget,status,created_at')
+                ->get()
                 ->pluck('request');
         }
 
