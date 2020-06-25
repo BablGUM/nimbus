@@ -117,6 +117,7 @@ class Application extends Model
     {
         $mediators = Mediator::all()->pluck('user_id');
         $countArray = count($mediators);
+
         if($countArray == 0){
             $mediator_id = User::where('role_id', '=', 3)->get()->random()->id;
         }
@@ -135,7 +136,8 @@ class Application extends Model
                     }
                 }
             }
-           if ($max_frq > 1)
+
+           if ($max_frq >= 1)
            {
                $mediator_id = User::where('role_id', '=', 3)->where('id','!=',$num)->get()->random()->id;
                $mediators_array = User::where('role_id', '=', 3)->get()->pluck('id');
