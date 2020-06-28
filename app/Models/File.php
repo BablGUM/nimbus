@@ -1,9 +1,17 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class File
+ * @package App\Models
+ * @property string name
+ * @property string type
+ * @property string extension
+ * @property int user_id
+ */
 class File extends Model
 {
     protected $fillable = [

@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 
-use App\Role;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserAddRequest;
 use App\Http\Requests\UserEditRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\User;
+use App\Models\User;
 use Exception;
 use Psy\Util\Str;
 use Illuminate\Support\Facades\Hash;

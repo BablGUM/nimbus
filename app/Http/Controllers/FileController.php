@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Document;
-use App\File;
+use App\Models\Document;
+use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Auth;
@@ -83,7 +83,7 @@ class FileController extends Controller
 
         if($request->type == 'doc')
         {
-            $count = \App\Document::where('request_id', '=', $id)->count();
+            $count = \App\Models\Document::where('request_id', '=', $id)->count();
             $file_s = new Filesystem();
             $size = count($_FILES['files']['name']);
             $value = $size + $count;
@@ -113,7 +113,7 @@ class FileController extends Controller
         {
             $file_s = new Filesystem();
             $size = count($_FILES['files']['name']);
-            $value = $size + \App\Document::where('request_id', '=', $id)->count();
+            $value = $size + \App\Models\Document::where('request_id', '=', $id)->count();
             if($request->hasfile('files')) {
                 foreach ($request->files as $file) {
                     for($j = 0;$j < $size;$j++){

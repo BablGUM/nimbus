@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -10,6 +10,26 @@ use Illuminate\Support\Str;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+
+/**
+ * Class User
+ *
+ * @package App\Models
+ * @property string login
+ * @property string email
+ * @property string full_name
+ * @property string first_name
+ * @property string last_name
+ * @property string patronymic
+ * @property string phone
+ * @property string residence_address
+ * @property string password
+ * @property int    role_id
+ * @property string verefi_code
+ * @property string reset_code
+ *
+ *
+ */
 
 class User extends Authenticatable
 {

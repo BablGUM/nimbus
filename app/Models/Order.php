@@ -1,15 +1,30 @@
 <?php
 
-namespace App;
+namespace App\Models;
+
 
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use App\Category;
+use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Arr;
 
-class Application extends Model
+/**
+ * Class Order
+ * @package App\Models
+ * @property string title
+ * @property string description
+ * @property string path_to
+ * @property int budget
+ * @property string start_date
+ * @property string end_date
+ * @property int status
+ * @property string created_at
+ * @property int user_id
+ * @property int category_id
+ */
+class Order extends Model
 {
     public $timestamps = false;
 
@@ -29,9 +44,15 @@ class Application extends Model
 
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo('App\Models\User');
     }
 
+
+
+    public function executors()
+    {
+        return $this->hasMany('App\Models\Executor');
+    }
     /**
      * Метод создание массива для заказа
      *
@@ -46,14 +67,12 @@ class Application extends Model
     {
 
         if($request->name_category){
-            $category_id = Category::where('name', '=', $request->name_category)->get()->first()->id;
+            $category_id = Category::where('name', '=', $request->name_category)->first()->id;
 
         }
         else{
            $category_id = $app->category_id;
         }
-
-
 
         $data = [
             'title' => $request->title,
@@ -83,12 +102,12 @@ class Application extends Model
     {
         if ($method == 'create'){
             if ($request->file) {
-                $data = Application::create($app->generateArrayRequestApplication($request,
+                $data = Order::create($app->generateArrayRequestApplication($request,
                     $user->id,
                     $model->fileSave($request, $user,null),null));
             } else {
                 $fileUrl = null;
-                $data = Application::create($app->generateArrayRequestApplication($request, $user->id, $fileUrl,null));
+                $data = Order::create($app->generateArrayRequestApplication($request, $user->id, $fileUrl,null));
             }
             return $data;
         }
@@ -96,12 +115,12 @@ class Application extends Model
 
             if ($request->file) {
 
-                $data = Application::update($app->generateArrayRequestApplication($request,
+                $data = Order::update($app->generateArrayRequestApplication($request,
                     $app->user_id,
                     $model->fileSave($request, $user,$app->path_to),$app));
 
             } else {
-                $data = Application::update($app->generateArrayRequestApplication($request,   $app->user_id, $app->path_to,$app));
+                $data = Order::update($app->generateArrayRequestApplication($request,   $app->user_id, $app->path_to,$app));
 
             }
             return $data;
@@ -116,10 +135,10 @@ class Application extends Model
     public function getMediatorsAndSetToApplication($id_request)
     {
         $mediators = Mediator::all()->pluck('user_id');
+        $mediators_query = User::where('role_id', '=', 3);
         $countArray = count($mediators);
-
         if($countArray == 0){
-            $mediator_id = User::where('role_id', '=', 3)->get()->random()->id;
+            $mediator_id = $mediators_query->get()->random()->id;
         }
         else {
             $num = $mediators[0];
@@ -139,8 +158,8 @@ class Application extends Model
 
            if ($max_frq >= 1)
            {
-               $mediator_id = User::where('role_id', '=', 3)->where('id','!=',$num)->get()->random()->id;
-               $mediators_array = User::where('role_id', '=', 3)->get()->pluck('id');
+               $mediator_id = $mediators_query->where('id','!=',$num)->get()->random()->id;
+               $mediators_array = $mediators_query->get()->pluck('id');
                $mediators_array = $mediators_array->diff($mediators);
                 $count = count($mediators_array->all());
                 if ($count > 0){
@@ -151,7 +170,7 @@ class Application extends Model
 
         }
         $dataInput = [
-            'request_id' => $id_request,
+            'order_id' => $id_request,
             'user_id' => $mediator_id
 
         ];
@@ -170,7 +189,7 @@ class Application extends Model
     {
         $user = Auth::user()->role_id;
         if ($user == 1) {
-            $request = Application::select("id","title","description","budget","status","created_at")
+            $request = Order::select("id","title","description","budget","status","created_at")
                 ->orderBy('id', 'DESC')->where('user_id', '=', $id)->get();
         }
         if ($user == 2) {
@@ -201,31 +220,7 @@ class Application extends Model
     {
         return $this->checkRolesByRequest($id);
     }
-    /**
-     * Метод создания массива для вывода всех заказчиков , посредников и исполнителей
-     *
-     * @param $id
-     * @param $category
-     * @param $mediator
-     * @param $user_client
-     * @param $executors
-     *
-     * @return array
-     *
-     */
 
-    public function generateArrayToApplicationShow($id, $category, $mediator, $user_client, $executors)
-    {
-        return array(
-            [
-                'order' => Application::find($id),
-                'category_name' => $category,
-                'mediator' => $mediator->full_name,
-                'client' => $user_client->first()->full_name,
-                'executors' => $executors
-            ]
-        );
-    }
     /**
      * Метод создания массива исполнителей
      *
@@ -238,17 +233,17 @@ class Application extends Model
     public function generateArrayToExecutors($request_executor, $id)
     {
         $executors = [];
-        foreach ($request_executor->pluck('user_id') as $item) {
 
+        foreach ($request_executor->pluck('user_id') as $userId) {
+            $user = User::find($userId);
+            $exec = Executor::where('order_id', '=', $id)->where('user_id', '=', $userId)->first();
             $executors = Arr::prepend($executors,
                 [
-                    'id' => User::where('id', '=', $item)->get()->first()->id,
-                    'full_name' => User::where('id', '=', $item)->get()->first()->full_name,
-                    'first_name' => User::where('id', '=', $item)->get()->first()->first_name,
-                    'client_chose' => Executor::where('request_id', '=', $id)
-                        ->where('user_id', '=', $item)->get()->first()->client_chose,
-                    'executor_chose' => Executor::where('request_id', '=', $id)
-                        ->where('user_id', '=', $item)->get()->first()->executor_chose,
+                    'id'                =>             $user->id,
+                    'full_name'         =>             $user->full_name,
+                    'first_name'        =>             $user->first_name,
+                    'client_chose'      =>             $exec->client_chose,
+                    'executor_chose'    =>             $exec->executor_chose,
 
                 ]);
         }

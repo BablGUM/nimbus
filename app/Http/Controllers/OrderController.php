@@ -3,24 +3,22 @@
 namespace App\Http\Controllers;
 
 
-use App\Mediator;
-use App\User;
+use App\Models\Mediator;
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Application;
+use App\Models\Order;
 use App\Http\Controllers\FileController;
-use App\Http\Requests\ApplicationRequest;
+use App\Http\Requests\OrderRequest;
 use Illuminate\Support\Facades\Auth;
-use App\Category;
+use App\Models\Category;
 use Illuminate\Support\Arr;
-use App\Executor;
+use App\Models\Executor;
 use Illuminate\Filesystem\Filesystem;
 
-class ApplicationController extends Controller
+class OrderController extends Controller
 {
     /**
      * Вывод заказов от заказчиков для исполнителе
-     *
-     *
      * @return mixed
      *
      * @Rest\Get("/request")
@@ -29,7 +27,7 @@ class ApplicationController extends Controller
     {
 
         return $this->sendResponse(
-            Application::select("id","title","description","budget","status","created_at")
+            Order::select("id","title","description","budget","status","created_at")
                 ->orderBy('id', 'DESC')
                 ->where('status', '=', 1)
                 ->get(), '200 OK', 200);
@@ -43,42 +41,36 @@ class ApplicationController extends Controller
      *
      * @Rest\Get("/request/{$id}")
      */
-    public function show($id)
+    public function show(Order $order)
     {
-        if (Application::find($id)) {
-            $application = new Application();
-            $category_id = Application::find($id)->category_id;
-            $category = Category::where('id', '=', $category_id)->get()->first()->name;
-            $mediator_request = Mediator::where('request_id', '=', $id)->get()->first();
-                $mediator = User::find($mediator_request->user_id);
-            $user_client = User::find(Application::find($id)->first()->user_id);
-            $request_executor = Executor::where('request_id', '=', $id)->get();
-            $executors = $application->generateArrayToExecutors($request_executor,$id);
+        return $this->sendResponse(array(
+            [
+                'order' => Order::find($order->id),
+                'category_name' => Category::where('id', '=', $order->category_id)->first()->name,
+                'mediator' => User::find(Mediator::where('order_id', '=', $order->id)->first()->user_id)->full_name,
+                'client' => $user_client = User::find($order->first()->user_id)->full_name,
+                'executors' => $order->generateArrayToExecutors($order->executors, $order->id)
+            ])
+        ,'OK',200);
 
-            return $this->sendResponse($application
-                ->generateArrayToApplicationShow($id,$category,$mediator,$user_client,$executors),
-                '200 OK', 200);
-        }
-        return $this->sendError('ERROR 404 NOT FOUND', 404, ['Данный заказ не существует']);
     }
     /**
      * Создание заказа
      *
-     * @param ApplicationRequest $request
+     * @param OrderRequest $request
      *
      * @return mixed
      *
      * @Rest\Post("/request")
      */
-    public function store(ApplicationRequest $request)
+    public function store(OrderRequest $request)
     {
         $user = Auth::user();
-        $app = new Application();
-        $model = new FileController();
-        $mediator = new Application();
+        $order = new Order();
+        $files = new FileController();
         $method = 'create';
-        $data = $app->checkFile($request, $app, $model, $user,$method);
-        $mediator->getMediatorsAndSetToApplication($data->id);
+        $data = $order->checkFile($request, $order, $files, $user,$method);
+        $order->getMediatorsAndSetToApplication($data->id);
 
         return $this->sendResponse($data, '201 CREATED', 201);
     }
@@ -93,7 +85,7 @@ class ApplicationController extends Controller
     public function showRequest()
     {
         $user = Auth::user();
-        $app = new Application();
+        $app = new Order();
 
         return $this->sendResponse($app->requestGenerate($user->id), 'OK', 200);
     }
@@ -110,10 +102,9 @@ class ApplicationController extends Controller
     {
         $user = Auth::user();
         $file = new Filesystem();
-        $path = Application::where('id', '=', $request->request_id)->where('user_id', '=',
-            $user->id)->get()->first()->path_to;
-        $delete_request = Application::where('id', '=', $request->request_id)->where('user_id', '=',
-            $user->id)->delete();
+        $order = Order::where('id', '=', $request->request_id)->where('user_id', '=', $user->id);
+        $path = $order->first()->path_to;
+        $delete_request = $order->delete();
 
         if($delete_request > 0){
             $delete_request_mediators = Mediator::where('request_id','=',$request->request_id)->delete();
@@ -132,13 +123,12 @@ class ApplicationController extends Controller
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function endRequest(Request $request,$id)
+    public function endRequest(Order $order)
     {
-        $application = Application::where('id', '=', $id)->get()->first();
-        $application->status = 3;
-        $application->save();
-        return response()->json(true, 200);
+        $order->status = 3;
+        $order->save();
 
+        return response()->json(true, 200);
     }
 
     /**
@@ -146,13 +136,12 @@ class ApplicationController extends Controller
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function startRequest(Request $request,$id)
+    public function startRequest(Order $order)
     {
-        $application = Application::where('id', '=', $id)->get()->first();
-        $application->status = 1;
-        $application->save();
-        return response()->json(true, 200);
+        $order->status = 1;
+        $order->save();
 
+        return response()->json(true, 200);
     }
 
 

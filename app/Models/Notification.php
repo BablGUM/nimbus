@@ -1,9 +1,10 @@
 <?php
 
-namespace App;
+namespace App\Models;
+
 
 use Illuminate\Database\Eloquent\Model;
-use App\Application;
+use App\Models\Order;
 use Illuminate\Support\Facades\Mail;
 
 class Notification extends Model

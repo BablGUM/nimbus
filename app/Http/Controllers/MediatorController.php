@@ -3,43 +3,39 @@
 namespace App\Http\Controllers;
 
 
-use App\File;
-use App\Mediator;
-use App\User;
+use App\Models\File;
+use App\Models\Mediator;
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Application;
+use App\Models\Order;
 use App\Http\Controllers\FileController;
-use App\Http\Requests\ApplicationRequest;
+use App\Http\Requests\OrderRequest;
 use Illuminate\Support\Facades\Auth;
-use App\Category;
+use App\Models\Category;
 use Illuminate\Support\Arr;
-use App\Executor;
-use App\Http\Requests\ApplicationEditRequest;
+use App\Models\Executor;
+use App\Http\Requests\OrderEditRequest;
 
 class MediatorController extends Controller
 {
-    public function edit(ApplicationEditRequest $request,$id)
+    public function edit(OrderEditRequest $request,Order $order)
     {
-
-        $application = Application::findOrFail($id);
         $user = Auth::user();
-
         $model = new FileController();
         $method = 'edit';
-        $data = $application->checkFile($request, $application, $model, $user,$method);
-        return $this->sendResponse($application, $data, 200);
+        $data = $order->checkFile($request, $order, $model, $user,$method);
+
+        return $this->sendResponse($order, $data, 200);
     }
 
-    public function downloadFile(Request $request,$id)
+    public function downloadFile(Request $request,Order $order)
     {
-
-        $application = Application::findOrFail($id);
         $model = new FileController();
-        $url = $model->fileSave($request, $application->user_id, $application->path_to);
-        $application->path_to = $url;
-        $application->save();
+        $url = $model->fileSave($request, $order->user_id, $order->path_to);
+        $order->path_to = $url;
+        $order->save();
 
-        return $this->sendResponse($application,'ok',200);
+        return $this->sendResponse($order,'ok',200);
     }
 
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +15,6 @@ class Category extends Model
 
     public function role()
     {
-        return $this->hasMany('App\Application');
+        return $this->hasMany('App\Models\Order');
     }
 }

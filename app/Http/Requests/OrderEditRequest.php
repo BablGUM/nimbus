@@ -4,7 +4,7 @@
 namespace App\Http\Requests;
 
 
-class ApplicationEditRequest extends ApiRequest
+class OrderEditRequest extends ApiRequest
 {
     /**
      * Get the validation rules that apply to the request.

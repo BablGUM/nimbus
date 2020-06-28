@@ -1,10 +1,15 @@
 <?php
 
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Role
+ * @package App\Models
+ * @property string role_name
+ */
 class Role extends Model
 {
 
@@ -21,6 +26,6 @@ class Role extends Model
 
     public function role()
     {
-        return $this->hasMany('App\User');
+        return $this->hasMany('App\Models\User');
     }
 }

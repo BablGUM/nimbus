@@ -4,10 +4,10 @@
 namespace App\Http\Controllers;
 
 
-use App\Application;
-use App\Executor;
-use App\Notification;
-use App\User;
+use App\Models\Order;
+use App\Models\Executor;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Arr;
@@ -18,24 +18,22 @@ class ExecutorController extends Controller
      * @param $id
      * @return mixed
      */
-    public function store($id)
+    public function store(Order $order)
     {
 
         $users = Auth::user();
-
-        $model = Executor::where('user_id', '=', $users->id)->where('request_id', '=', $id)->get();
+        $model = Executor::where('user_id', '=', $users->id)->where('order_id', '=', $order->id)->get();
 
         if ($model->count() > 0) {
             return $this->sendError('Вы уже откликнулись', 403, ['Нельзя откликнутся несколько раз']);
         } else {
-            $app = Application::where('id','=',$id)->get()->first();
-            $user = User::where('id','=',$app->user_id)->get()->first();
-            $link = 'https://aqueous-sea-49755.herokuapp.com/order-detail/'. $id . '/active/client';
+            $user = User::where('id','=',$order->user_id)->first();
+            $link = 'https://aqueous-sea-49755.herokuapp.com/order-detail/'. $order->id . '/active/client';
             $notification = new Notification();
-            $notification->requestResponded($user->email,$user->full_name,$link,$app->title);
+            $notification->requestResponded($user->email,$user->full_name,$link,$order->title);
 
             $data = [
-                'request_id' => $id,
+                'order_id' => $order->id,
                 'user_id' => $users->id,
 
             ];
@@ -51,12 +49,10 @@ class ExecutorController extends Controller
      */
     public function consetClient(Request $request, $id)
     {
-        $model = Executor::where('user_id', '=', $id)->where('request_id', '=', $request->request_id)->get();
 
-
-
-        $model->first()->client_chose = 1;
-        $model->first()->save();
+        $model = Executor::where('user_id', '=', $id)->where('order_id', '=', $request->request_id)->first();
+        $model->client_chose = 1;
+        $model->save();
 
         return response()->json(true, 200);
     }
@@ -69,17 +65,17 @@ class ExecutorController extends Controller
     public function consetExecutor(Request $request)
     {
         $user = Auth::user();
-        $model = Executor::where('user_id', '=', $user->id)->where('request_id', '=', $request->request_id)->get();
+        $model = Executor::where('user_id', '=', $user->id)->where('order_id', '=', $request->request_id)->first();
         $model_delete = Executor::where('user_id', '!=', $user->id)->delete();
-        $application = Application::where('id', '=', $request->request_id)->get()->first();
-        $user_client = User::where('id','=',$application->user_id)->get()->first();
-        $application->status = 2;
-        $application->save();
-        $model->first()->executor_chose = 1;
-        $model->first()->save();
+        $order = Order::where('id', '=', $request->request_id)->first();
+        $user_client = User::where('id','=',$order->user_id)->first();
+        $order->status = 2;
+        $order->save();
+        $model->executor_chose = 1;
+        $model->save();
         $notification = new Notification();
-        $link = "https://aqueous-sea-49755.herokuapp.com/order-detail/". $request->id ."/process";
-        $notification->requestStart($user_client->email,$user_client->full_name,$link,$application->title);
+        $link = "https://aqueous-sea-49755.herokuapp.com/order-detail/". $request->request_id ."/process";
+        $notification->requestStart($user_client->email,$user_client->full_name,$link,$order->title);
         return response()->json(true, 200);
 
     }
@@ -91,7 +87,8 @@ class ExecutorController extends Controller
     public function rejectionExecutor(Request $request)
     {
         $user = Auth::user();
-        $model_delete = Executor::where('user_id', '=', $user->id)->where('request_id', '=', $request->request_id)->delete();
+        $model_delete = Executor::where('user_id', '=', $user->id)
+            ->where('order_id', '=', $request->request_id)->delete();
 
         return response()->json(true, 200);
     }
@@ -104,7 +101,7 @@ class ExecutorController extends Controller
         $user = Auth::user();
         $request_id = Executor::where('user_id','=',$user->id)->where('client_chose','=','1')->get();
         $executors = [];
-        foreach($request_id->pluck('request_id') as $item){
+        foreach($request_id->pluck('order_id') as $item){
 
             $executors = Arr::prepend($executors,
                 [
