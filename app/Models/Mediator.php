@@ -21,7 +21,7 @@ class Mediator extends Model
 
     public function request()
     {
-        return $this->hasMany('App\Models\Order','id','request_id');
+        return $this->hasMany('App\Models\Order','id','order_id');
     }
 
 
