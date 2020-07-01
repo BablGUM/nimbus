@@ -194,14 +194,14 @@ class Order extends Model
         }
         if ($user == 2) {
             $request = Executor::where('user_id', '=', $id)
-                ->with('request:id,title,description,budget,status,created_at')
+                ->with()
                 ->get()
                 ->pluck('request');
 
         }
         if ($user == 3) {
             $request = Mediator::where('user_id', '=', $id)
-                ->with('request:id,title,description,budget,status,created_at')
+                ->with()
                 ->get()
                 ->pluck('request');
         }
